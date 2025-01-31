@@ -13,12 +13,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Ensure IPFS CLI is installed (Assuming IPFS is already installed globally on your system)
+      # Step 2: Set IPFS Path (Set path to where IPFS is installed)
+      - name: Set IPFS Path
+        run: |
+          $env:PATH += ";C:\Apps\kubo"
+          echo "IPFS path set to C:\Apps\kubo"
+
+      # Step 3: Verify IPFS CLI Installation
       - name: Verify IPFS CLI Installation
         run: |
           ipfs --version
 
-      # Step 3: Add website files to IPFS
+      # Step 4: Add website files to IPFS
       - name: Add website to IPFS
         id: ipfs_add
         run: |
@@ -26,7 +32,7 @@ jobs:
           ipfs add -r . > ipfs_hash.txt
           echo "::set-output name=cid::$(tail -n 1 ipfs_hash.txt | awk '{print $2}')"
 
-      # Step 4: Pin the content to Pinata
+      # Step 5: Pin the content to Pinata
       - name: Pin to Pinata
         run: |
           curl -X POST "https://api.pinata.cloud/pinning/pinByHash" \
@@ -35,6 +41,6 @@ jobs:
           -H "Content-Type: application/json" \
           -d "{\"hashToPin\":\"${{ steps.ipfs_add.outputs.cid }}\"}"
 
-      # Step 5: Output the IPFS URL
+      # Step 6: Output the IPFS URL
       - name: Output IPFS URL
         run: echo "Website deployed to https://gateway.pinata.cloud/ipfs/${{ steps.ipfs_add.outputs.cid }}"
