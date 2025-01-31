@@ -16,20 +16,21 @@ jobs:
       # Step 2: Set IPFS Path (Set path to where IPFS is installed)
       - name: Set IPFS Path
         run: |
-          $env:PATH += ";C:\Apps\kubo"
-          echo "IPFS path set to C:\Apps\kubo"
+          echo "Setting IPFS path to C:\Apps\kubo"
+          $env:IPFS_PATH = "C:\Apps\kubo\ipfs.exe"
+          echo "IPFS path set."
 
-      # Step 3: Verify IPFS CLI Installation
+      # Step 3: Verify IPFS CLI Installation using full path
       - name: Verify IPFS CLI Installation
         run: |
-          ipfs --version
+          C:\Apps\kubo\ipfs.exe --version
 
       # Step 4: Add website files to IPFS
       - name: Add website to IPFS
         id: ipfs_add
         run: |
-          ipfs init
-          ipfs add -r . > ipfs_hash.txt
+          C:\Apps\kubo\ipfs.exe init
+          C:\Apps\kubo\ipfs.exe add -r . > ipfs_hash.txt
           echo "::set-output name=cid::$(tail -n 1 ipfs_hash.txt | awk '{print $2}')"
 
       # Step 5: Pin the content to Pinata
