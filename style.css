@@ -1,0 +1,19 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f8ff;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    color: #333;
+  }
+  
+  #app {
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    color: #4caf50;
+  }
+  
