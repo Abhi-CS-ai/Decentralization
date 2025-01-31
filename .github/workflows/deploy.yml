@@ -9,15 +9,19 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      # Step 1: Checkout code from repository
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Step 2: Install IPFS CLI (Kubo)
       - name: Install IPFS CLI
         run: |
-          wget https://dist.ipfs.tech/kubo/latest/kubo_latest_linux-amd64.tar.gz
+          wget https://dist.ipfs.io/kubo/latest/kubo_latest_linux-amd64.tar.gz
           tar -xvzf kubo_latest_linux-amd64.tar.gz
           sudo mv kubo/ipfs /usr/local/bin/ipfs
+          ipfs --version  # Verifying that IPFS CLI is installed
 
+      # Step 3: Initialize IPFS and Add Files to IPFS
       - name: Add website to IPFS
         id: ipfs_add
         run: |
@@ -25,6 +29,7 @@ jobs:
           ipfs add -r . > ipfs_hash.txt
           echo "::set-output name=cid::$(tail -n 1 ipfs_hash.txt | awk '{print $2}')"
 
+      # Step 4: Pin the Content to Pinata
       - name: Pin to Pinata
         run: |
           curl -X POST "https://api.pinata.cloud/pinning/pinByHash" \
@@ -33,5 +38,6 @@ jobs:
           -H "Content-Type: application/json" \
           -d "{\"hashToPin\":\"${{ steps.ipfs_add.outputs.cid }}\"}"
 
+      # Step 5: Output the IPFS URL
       - name: Output IPFS URL
         run: echo "Website deployed to https://gateway.pinata.cloud/ipfs/${{ steps.ipfs_add.outputs.cid }}"
