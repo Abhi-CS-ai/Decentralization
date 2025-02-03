@@ -1,4 +1,4 @@
-name: Deploy to Pinata IPFS
+name: Deploy to IPFS
 
 on:
   push:
@@ -7,46 +7,17 @@ on:
 
 jobs:
   deploy:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
+
     steps:
-      # Step 1: Checkout code from repository
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      # Step 2: Set IPFS Path (Set path to where IPFS is installed)
-      - name: Set IPFS Path in PowerShell
-        run: |
-          echo "Setting IPFS path to C:\Apps\kubo"
-          $env:PATH += ";C:\Apps\kubo"
-          echo "IPFS path set to $env:PATH"
-          # Verify path and try ipfs
-          $env:PATH
-
-      # Step 3: Verify IPFS CLI Installation
-      - name: Verify IPFS CLI Installation
-        run: |
-          echo "Verifying IPFS installation..."
-          & "C:\Apps\kubo\ipfs.exe" --version
-
-      # Step 4: Add website files to IPFS
-      - name: Add website to IPFS
-        id: ipfs_add
-        run: |
-          echo "Initializing IPFS..."
-          & "C:\Apps\kubo\ipfs.exe" init
-          echo "Adding website to IPFS..."
-          & "C:\Apps\kubo\ipfs.exe" add -r . > ipfs_hash.txt
-          echo "::set-output name=cid::$(tail -n 1 ipfs_hash.txt | awk '{print $2}')"
-
-      # Step 5: Pin the content to Pinata
-      - name: Pin to Pinata
-        run: |
-          curl -X POST "https://api.pinata.cloud/pinning/pinByHash" \
-          -H "pinata_api_key: ${{ secrets.PINATA_API_KEY }}" \
-          -H "pinata_secret_api_key: ${{ secrets.PINATA_SECRET_API_KEY }}" \
-          -H "Content-Type: application/json" \
-          -d "{\"hashToPin\":\"${{ steps.ipfs_add.outputs.cid }}\"}"
-
-      # Step 6: Output the IPFS URL
-      - name: Output IPFS URL
-        run: echo "Website deployed to https://gateway.pinata.cloud/ipfs/${{ steps.ipfs_add.outputs.cid }}"
+    - name: Deploy to IPFS
+      uses: anantaramdas/ipfs-pinata-deploy-action@v1.6.4
+      with:
+        pinata-api-key: ${{ secrets.PINATA_API_KEY }}
+        pinata-secret-api-key: ${{ secrets.PINATA_SECRET_API_KEY }}
+        path: '.'
+        verbose: true
+        remove-old: false
